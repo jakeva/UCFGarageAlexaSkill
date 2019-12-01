@@ -8,17 +8,17 @@ Skill should be available soon to download.
 
 ## Example Usage Cases
 
-Alexa, ask U. C. F. garage checker how full garage A is
+Alexa, ask garage checker how full garage A is
 
-Alexa, ask U. C. F. garage checker how full all garages are
+Alexa, ask garage checker how full all garages are
 
-Alexa, ask U. C .F. garage checker what the emptiest garage is
+Alexa, ask garage checker what the emptiest garage is
 
-Alexa, ask U. C. F. garage checker for help
+Alexa, ask garage checker for help
 
 **This skill also allows for an open session of up to 8 seconds.**
 
-Alexa, launch U. C. F. garage checker
+Alexa, launch garage checker
 
 Alexa, how full is garage A?
 
