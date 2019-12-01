@@ -16,6 +16,13 @@ Alexa, ask ucf garage checker what the emptiest garage is
 
 Alexa, ask ucf garage checker for help
 
+**This skill also allows for an open session of up to 8 seconds.**
+
+Alexa, launch ucf garage checker
+
+Alexa, how full is garage A?
+
+
 ## Please Note
 UCF only provides garages **A**, **B**, **C**, **D**, **H**, **I**, and **Libra** with the ability to check how full they are. All other garages are currently not supported.
 
