@@ -1,18 +1,21 @@
 import requests
 from bs4 import BeautifulSoup
 
+import sentry_sdk
+from sentry_sdk.integrations.aws_lambda import AwsLambdaIntegration
 import logging
-import ask_sdk_core.utils as ask_utils
 
+import ask_sdk_core.utils as ask_utils
 from ask_sdk_core.skill_builder import SkillBuilder
 from ask_sdk_core.dispatch_components import AbstractRequestHandler
 from ask_sdk_core.dispatch_components import AbstractExceptionHandler
 from ask_sdk_core.handler_input import HandlerInput
-
 from ask_sdk_model import Response
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
+
+sentry_sdk.init(dsn="https://a6449abe568a4ab6b61d21d9eb6b47c4@sentry.io/1840249", integrations=[AwsLambdaIntegration()])
 
 # function to parse and get all garage data and input it all into one dictionary
 def get_garage_data():
@@ -60,16 +63,13 @@ def get_specific_garage_data(name):
     data = get_garage_data()
     return data[name]
 
+
 # function to get all garage data
 def get_all_garage_data_as_string():
     dictionary = get_garage_data()
 
-    print(dictionary)
-
     garage_list = ''
     for key in dictionary.keys():
-        print(key)
-
         if key != 'LIBRA':
             garage_list += 'Garage ' + key.capitalize() + ' is at ' + dictionary[key] + ' percent capacity, '
         else:
@@ -95,25 +95,25 @@ def get_lowest_percentage():
             empty_garages.append((garage_name, percentage))
 
     # build a string response out of this list
-    string_response = ""
+    string_response = ''
 
     empties_length = len(empty_garages)
 
     if empties_length == 1:
-        string_response = "Garage %s is the least full with %d percent capacity." % (empty_garages[0][0], empty_garages[0][1])
+        string_response = 'Garage %s is the least full with %d percent capacity.' % (empty_garages[0][0], empty_garages[0][1])
     elif empties_length == 2:
-        string_response = "Garages %s and %s are the least full with %d percent capacity." % (empty_garages[0][0], empty_garages[1][0], empty_garages[0][1])
+        string_response = 'Garages %s and %s are the least full with %d percent capacity.' % (empty_garages[0][0], empty_garages[1][0], empty_garages[0][1])
     elif 3 <= empties_length < len(garages_data):
-        string_response = "Garages "
+        string_response = 'Garages '
 
         for i in range(empties_length - 1):
-            string_response += "%s, " % empty_garages[i][0]
+            string_response += '%s, ' % empty_garages[i][0]
 
-        string_response += "and %s" % empty_garages[-1][0]
+        string_response += 'and %s' % empty_garages[-1][0]
 
-        string_response += " are the least full with %d percent capacity." % empty_garages[-1][1]
+        string_response += ' are the least full with %d percent capacity.' % empty_garages[-1][1]
     else:
-        string_response = "All garages are %d percent full." % empty_garages[-1][1]
+        string_response = 'All garages are %d percent full.' % empty_garages[-1][1]
 
     return string_response
 
@@ -127,7 +127,7 @@ class LaunchRequestHandler(AbstractRequestHandler):
 
     def handle(self, handler_input):
         # type: (HandlerInput) -> Response
-        speak_output = "Welcome to the UCF Garage Availability skill."
+        speak_output = "Welcome to the UCF Garage Availability skill. For help, say help."
 
         return handler_input.response_builder.speak(speak_output).ask(speak_output).response
 
@@ -142,12 +142,19 @@ class SpecificGarageIntentHandler(AbstractRequestHandler):
     def handle(self, handler_input):
         # type: (HandlerInput) -> Response
 
+        speak_output = ''
         garage_name = handler_input.request_envelope.request.intent.slots['garage_name'].value.upper()
-        percentage = get_specific_garage_data(garage_name)
+        try:
+            percentage = get_specific_garage_data(garage_name)
 
-        speak_output = 'Garage ' + garage_name.capitalize() + ' is at ' + percentage + ' percent capacity.'
+            if garage_name != 'LIBRA':
+                speak_output = 'Garage ' + garage_name.capitalize() + ' is at ' + percentage + ' percent capacity.'
+            else:
+                speak_output = garage_name.capitalize() + ' Garage is at ' + percentage + ' percent capacity.'
+        except KeyError:
+            speak_output = 'Garage ' + garage_name + ' either does not exist or is not available to see how full it is.'
 
-        return handler_input.response_builder.speak(speak_output).response
+        return handler_input.response_builder.speak(speak_output).ask(speak_output).response
 
 class AllGarageIntentHandler(AbstractRequestHandler):
     """Handler for All Garage Intent."""
@@ -161,7 +168,7 @@ class AllGarageIntentHandler(AbstractRequestHandler):
 
         speak_output = get_all_garage_data_as_string()
 
-        return handler_input.response_builder.speak(speak_output).response
+        return handler_input.response_builder.speak(speak_output).ask(speak_output).response
 
 class EmptiestGarageIntentHandler(AbstractRequestHandler):
     """Handler for Emptiest Garage Intent."""
@@ -175,7 +182,7 @@ class EmptiestGarageIntentHandler(AbstractRequestHandler):
 
         speak_output = get_lowest_percentage()
 
-        return handler_input.response_builder.speak(speak_output).response
+        return handler_input.response_builder.speak(speak_output).ask(speak_output).response
 
 class HelpIntentHandler(AbstractRequestHandler):
     """Handler for Help Intent."""
@@ -218,8 +225,6 @@ class SessionEndedRequestHandler(AbstractRequestHandler):
     def handle(self, handler_input):
         # type: (HandlerInput) -> Response
 
-        # Any cleanup logic goes here.
-
         return handler_input.response_builder.response
 
 
@@ -237,16 +242,13 @@ class CatchAllExceptionHandler(AbstractExceptionHandler):
         # type: (HandlerInput, Exception) -> Response
         logger.error(exception, exc_info=True)
 
+        sentry_sdk.capture_exception(exception)
         speak_output = "Sorry, I had trouble doing what you asked. Please try again."
 
         return handler_input.response_builder.speak(speak_output).ask(speak_output).response
 
 
-# The SkillBuilder object acts as the entry point for your skill, routing all request and response
-# payloads to the handlers above. Make sure any new handlers or interceptors you've
-# defined are included below. The order matters - they're processed top to bottom.
-
-
+# The SkillBuilder object acts as the entry point for your skill, routing all request and response payloads to the handlers above.
 sb = SkillBuilder()
 
 sb.add_request_handler(LaunchRequestHandler())
