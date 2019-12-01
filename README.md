@@ -23,4 +23,4 @@ UCF only provides garages **A**, **B**, **C**, **D**, **H**, **I**, and **Libra*
 Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
 
 ## License
-[MIT](https://choosealicense.com/licenses/mit/)
+[GNU General Public License v3.0](https://choosealicense.com/licenses/gpl-3.0/)
