@@ -6,7 +6,7 @@ UCF Garage Availability Alexa Skill. Made with ❤️ using Python 3.7. Go Knigh
 
 Skill should be available soon to download.
 
-## Usage Example Cases
+## Example Usage Cases
 
 Alexa, ask ucf garage checker how full garage A is
 
