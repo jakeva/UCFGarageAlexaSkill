@@ -143,18 +143,18 @@ class SpecificGarageIntentHandler(AbstractRequestHandler):
         # type: (HandlerInput) -> Response
 
         speak_output = ''
-        garage_name = handler_input.request_envelope.request.intent.slots['garage_name'].value.upper()
+        garage_name = handler_input.request_envelope.request.intent.slots['garage_name'].value
         try:
-            percentage = get_specific_garage_data(garage_name)
+            percentage = get_specific_garage_data(garage_name.replace('.', '').upper())
 
-            if garage_name != 'LIBRA':
-                speak_output = 'Garage ' + garage_name.capitalize() + ' is at ' + percentage + ' percent capacity.'
+            if garage_name.replace('.', '') != 'LIBRA':
+                speak_output = 'Garage ' + garage_name.capitalize().replace('.', '') + ' is at ' + percentage + ' percent capacity.'
             else:
-                speak_output = garage_name.capitalize() + ' Garage is at ' + percentage + ' percent capacity.'
+                speak_output = garage_name.capitalize().replace('.', '') + ' Garage is at ' + percentage + ' percent capacity.'
         except KeyError:
             speak_output = 'Garage ' + garage_name + ' either does not exist or is not available to see how full it is.'
 
-        return handler_input.response_builder.speak(speak_output).ask(speak_output).response
+        return handler_input.response_builder.speak(speak_output).ask("If you want to ask another question, let me know. Otherwise, say stop.").response
 
 class AllGarageIntentHandler(AbstractRequestHandler):
     """Handler for All Garage Intent."""
@@ -168,7 +168,7 @@ class AllGarageIntentHandler(AbstractRequestHandler):
 
         speak_output = get_all_garage_data_as_string()
 
-        return handler_input.response_builder.speak(speak_output).ask(speak_output).response
+        return handler_input.response_builder.speak(speak_output).ask("If you want to ask another question, let me know. Otherwise, say stop.").response
 
 class EmptiestGarageIntentHandler(AbstractRequestHandler):
     """Handler for Emptiest Garage Intent."""
@@ -182,7 +182,7 @@ class EmptiestGarageIntentHandler(AbstractRequestHandler):
 
         speak_output = get_lowest_percentage()
 
-        return handler_input.response_builder.speak(speak_output).ask(speak_output).response
+        return handler_input.response_builder.speak(speak_output).ask("If you want to ask another question, let me know. Otherwise, say stop.").response
 
 class HelpIntentHandler(AbstractRequestHandler):
     """Handler for Help Intent."""
@@ -194,7 +194,7 @@ class HelpIntentHandler(AbstractRequestHandler):
     def handle(self, handler_input):
         # type: (HandlerInput) -> Response
         speak_output = ("This skill tells you how full each of the garages are at UCF. "
-                        "You can ask how full is garage A, B, C, D, H, I or Libra, "
+                        "You can ask how full is garage A, B, C, D, H, I, or Libra, "
                         " how full all garages are, "
                         " or what the emptiest garage is.")
 
@@ -210,7 +210,7 @@ class CancelOrStopIntentHandler(AbstractRequestHandler):
 
     def handle(self, handler_input):
         # type: (HandlerInput) -> Response
-        speak_output = "Goodbye!"
+        speak_output = "Goodbye."
 
         return handler_input.response_builder.speak(speak_output).response
 
