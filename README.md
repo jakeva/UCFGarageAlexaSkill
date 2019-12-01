@@ -4,7 +4,7 @@ UCF Garage Availability Alexa Skill. Made with ❤️ using Python 3.7. Go Knigh
 
 ## Installation
 
-Skill should be available soon to download.
+Skill is available to download **[here](https://www.amazon.com/Jake-Valenzuela-UCF-Garage-Availability/dp/B0826ZMLS3)** via the Amazon Store.
 
 ## Example Usage Cases
 
