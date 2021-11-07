@@ -15,7 +15,7 @@ from ask_sdk_model import Response
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
-sentry_sdk.init(dsn="https://a6449abe568a4ab6b61d21d9eb6b47c4@sentry.io/1840249", integrations=[AwsLambdaIntegration()])
+sentry_sdk.init(dsn="SENTRY_KEY", integrations=[AwsLambdaIntegration()])
 
 # function to parse and get all garage data and input it all into one dictionary
 def get_garage_data():
